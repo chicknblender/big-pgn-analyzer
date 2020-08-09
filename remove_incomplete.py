@@ -5,20 +5,20 @@ import os.path
 import time
 
 
-# def sanitize_dir(path):
-#     # produces a sanitized version of all .pgn files in a dir
-#
-#     dirlist = os.listdir(path)
-#     temp = []
-#     for item in dirlist:
-#         if pgndb.ispgn(path + '/' + item):
-#             temp.append(path + '/' + item)
-#     dirlist = temp
-#
-#     print(str(len(dirlist)) + ' PGN files found. Sanitizing all...')
-#     for item in dirlist:
-#         sanitize_db(item)
-#     print('sanitize_dir operation complete.')
+def remove_incomplete_dir(path):
+    # produces a sanitized version of all .pgn files in a dir
+
+    dirlist = os.listdir(path)
+    temp = []
+    for item in dirlist:
+        if pgndb.ispgn(path + '/' + item):
+            temp.append(path + '/' + item)
+    dirlist = temp
+
+    print(str(len(dirlist)) + ' PGN files found. Removing incomplete from all...')
+    for item in dirlist:
+        remove_imcomplete_db(item)
+    print('remove_incomplete_dir operation complete.')
 
 
 def remove_imcomplete_db(path):
@@ -46,9 +46,8 @@ def remove_imcomplete_db(path):
                 res = pgnfx.result(pgn)
                 if (res == '1-0') or (res == '0-1') or res == ('1/2-1/2'):
                     games += 1
-                    pgn = pgnfx.sanitize(pgn)
                     pgndb_str += pgn
-                    if games > 10000:
+                    if games > 100000:
                         with open(newfile, 'a+') as nf:
                             nf.write(pgndb_str)
                         pgndb_str = ''
@@ -61,8 +60,11 @@ def remove_imcomplete_db(path):
     res = pgnfx.result(pgn)
     if (res == '1-0') or (res == '0-1') or res == ('1/2-1/2'):
         pgndb_str += pgn
+
+    # write the remaining pgns to file
     with open(newfile, 'a+') as nf:
         nf.write(pgndb_str)
+
     end = time.time()
     print(path + ' remove_incomplete successful. ' + newfile + ' created.')
     sec = end - start
